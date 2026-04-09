@@ -1,0 +1,1450 @@
+{
+  "name": "PeterBorough-Whatsapp-Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {
+          "messageStatusUpdates": [
+            "all"
+          ]
+        }
+      },
+      "id": "52e1aa43-4be2-4a12-bdb6-3b7fca0f1118",
+      "name": "Receive Message",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        6768,
+        480
+      ],
+      "webhookId": "cd6a871f-d5f8-41b1-bd98-7b03a2be56a3",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "rugiPb9XjpNfmDce",
+          "name": "WhatsApp OAuth-PeterBoroughPlumbers"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.messages }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "855b7c8e-2327-41f6-8696-3f5c04e7e282",
+      "name": "Is Inbound Message?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        6848,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "messageType",
+              "value": "={{ $json.messages[0].type }}",
+              "type": "string"
+            },
+            {
+              "name": "from",
+              "value": "={{ $json.messages[0].from }}",
+              "type": "string"
+            },
+            {
+              "name": "messageId",
+              "value": "={{ $json.messages[0].id }}",
+              "type": "string"
+            },
+            {
+              "name": "senderName",
+              "value": "={{ $json.contacts ? $json.contacts[0].profile.name : '' }}",
+              "type": "string"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ $json.messages[0].timestamp }}",
+              "type": "string"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.messages[0].type === 'text' ? $json.messages[0].text.body : '' }}",
+              "type": "string"
+            },
+            {
+              "name": "audioId",
+              "value": "={{ $json.messages[0].type === 'audio' ? $json.messages[0].audio.id : '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2e57eadc-2f47-4151-8152-44566cf1ca90",
+      "name": "Normalize Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6992,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('Normalize Input').item.json.messageType }}",
+              "rightValue": "audio",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "48497a86-310e-4535-8062-5f5dfa8a8f7c",
+      "name": "Is Audio?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        7376,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v18.0/{{ $('Normalize Input').item.json.audioId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer EAF2wxDLD5MMBQwaRAptSG2kyn4wMZAJ9ILdEbXRZCVQDX3vpZCYmoCHBs4RHNm3EMwB2UuT7iDWkq4BLrBiCrFS1rHepuZAYVvW4g79dW8JKJyULESvqpmmc0X2whRfqNvfTP5gZANHS2Ua68bwCr9LawYcCzDHCQA4FHZBHxW39X0MMKSyonE9kV9u1HPgXuiowZDZD"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7baec139-03d9-4656-b319-2dd18e96fbd7",
+      "name": "Get Audio URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        7584,
+        256
+      ],
+      "webhookId": "8e07d54a-2962-4829-84c7-5fce3be82da5"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer EAF2wxDLD5MMBQwaRAptSG2kyn4wMZAJ9ILdEbXRZCVQDX3vpZCYmoCHBs4RHNm3EMwB2UuT7iDWkq4BLrBiCrFS1rHepuZAYVvW4g79dW8JKJyULESvqpmmc0X2whRfqNvfTP5gZANHS2Ua68bwCr9LawYcCzDHCQA4FHZBHxW39X0MMKSyonE9kV9u1HPgXuiowZDZD"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "60211c92-641b-43e9-91cb-5c06f81321b3",
+      "name": "Download Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        7744,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "cebbba6f-500c-4747-bbf3-f297d6c095b8",
+      "name": "Transcribe Audio",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [
+        7888,
+        256
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "VQVCMgBfyEgCrw5b",
+          "name": "OpenAi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "text",
+              "value": "={{ $json.text || $json.transcript || $json.output || '' }}",
+              "type": "string"
+            },
+            {
+              "name": "from",
+              "value": "={{ $('Normalize Input').item.json.from }}",
+              "type": "string"
+            },
+            {
+              "name": "messageId",
+              "value": "={{ $('Normalize Input').item.json.messageId }}",
+              "type": "string"
+            },
+            {
+              "name": "senderName",
+              "value": "={{ $('Normalize Input').item.json.senderName }}",
+              "type": "string"
+            },
+            {
+              "name": "messageType",
+              "value": "={{ $('Normalize Input').item.json.messageType }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4301d66c-6952-4961-a01e-f4eee9081fb4",
+      "name": "Use Transcript",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        8032,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://peterborough-plumbers-git-master-shahlals-projects.vercel.app/api/whatsapp/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "=3fc83ffbaea7cf2f7b517d7a82edaae0ec262d79e1ec428c039ebc6f4cb08c83"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "NjWNnUuVRCwDuLf1yu8w7T1XQnnWz5ei"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"waId\": \"{{ $('Normalize Input').item.json.from }}\",\n  \"messageText\": {{ JSON.stringify($('Normalize Input').item.json.text || $json.text || '') }},\n  \"waMessageId\": \"{{ $('Normalize Input').item.json.messageId }}\",\n  \"senderName\": \"{{ $('Normalize Input').item.json.senderName }}\",\n  \"messageType\": \"{{ $('Normalize Input').item.json.messageType }}\"\n}",
+        "options": {}
+      },
+      "id": "944989bf-3b90-497c-a547-88a9e94b61db",
+      "name": "Store Inbound Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8240,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.isDuplicate }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "01271f33-bf21-499f-b976-2071b78209dc",
+      "name": "Is Duplicate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        8416,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.botActive }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "74f2ec8b-86d8-4d05-a40e-4cde7440fbd6",
+      "name": "Bot Active?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        8608,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://peterborough-plumbers-git-master-shahlals-projects.vercel.app/api/whatsapp/customer?waId={{ $('Normalize Input').item.json.from }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "=3fc83ffbaea7cf2f7b517d7a82edaae0ec262d79e1ec428c039ebc6f4cb08c83"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "NjWNnUuVRCwDuLf1yu8w7T1XQnnWz5ei"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8506ed06-bf82-4068-9906-36bd19227d63",
+      "name": "Load Customer Profile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8816,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Customer name: {{ $('Normalize Input').item.json.senderName || 'Unknown' }}\nWhatsApp number (waId): {{ $('Normalize Input').item.json.from }}\nExisting profile: {{ JSON.stringify($input.first().json) }}\n\nCustomer message: {{ $json.customerMessage }}",
+        "options": {
+          "systemMessage": "CRITICAL SYSTEM CONSTRAINTS — READ FIRST — OVERRIDE EVERYTHING ELSE\n\nThese are non-negotiable. Follow them in every single reply without exception.\n\nCONSTRAINT 1 — NO FAKE BOOKINGS\nYou are FORBIDDEN from using any of these words or phrases unless the [[LEAD:...]] marker has already been output in this conversation:\n  scheduled / we have scheduled / visit is scheduled\n  booked / booking confirmed / all booked in\n  sorted / confirmed / arranged / done\n  we will message you before arrival / engineer will arrive\n  appointment made / appointment confirmed\n\nIf you have not output the [[LEAD:...]] marker yet, NOTHING is booked. Do not say otherwise.\n\nCONSTRAINT 2 — MANDATORY BOOKING FLOW — ALL 6 STEPS REQUIRED\nEvery booking request — new customer or returning — must complete ALL steps:\nStep 1: Confirm full name (\"Can I take your name?\")\nStep 2: Confirm postcode\nStep 3: Confirm full address\nStep 4: Confirm preferred date and time\nStep 5: Send a full booking summary and ask: \"Shall I go ahead and get that booked in?\"\nStep 6: Customer confirms yes → output [[LEAD:...]] marker → ONLY NOW say \"Great, that is booked in!\"\n\nNEVER skip any step. NEVER assume old details are still correct.\n\nCONSTRAINT 3 — RETURNING CUSTOMER = NEW BOOKING\nIf existingLead is in the customer profile, that is their PREVIOUS booking — not their current one.\nDo NOT say \"We have already got your details\" and skip the flow.\nYou MUST ask: \"Is the address still [previous address], or different?\"\nYou MUST ask for a new preferred date and time.\nUse forceNew: true in the [[LEAD:...]] marker.\n\nCONSTRAINT 4 — THE MARKER IS THE ONLY REAL ACTION\nSaying \"I have booked you in\" in a message does nothing. No engineer is notified. No record is created.\nOnly the [[LEAD:...]] marker triggers a real booking in the system.\nYou must output it, or no booking exists.\n\nYou are the WhatsApp customer service assistant for Peterborough Plumbers, a Gas Safe registered domestic plumbing and heating company based in Peterborough, UK with more than 50 years of combined experience.\n\nYou are speaking directly to customers on WhatsApp as a real member of the company team.\n\nSpeak naturally like an experienced local plumbing company worker.\nYour tone must be warm, calm, practical and professional.\n\nNever sound like an AI assistant.\n\nIDENTITY\n\nCompany\nPeterborough Plumbers\n3 Saville Road\nPeterborough PE3 7PR\n\nCredentials\nGas Safe Registered (Reg 123456)\n50+ years combined experience\n4.6 Google rating with 120+ reviews\n\nCoverage Area\nPE1, PE2, PE3, PE4, PE6, PE7, PE9\nIncluding Stamford, Market Deeping, Yaxley and Whittlesey.\n\nImportant\nThe customer is already messaging on WhatsApp.\nNever tell them to call the company.\nNever display the company phone number.\nNever ask for the customer's phone number.\n\nMESSAGE STYLE\n\nMessages must feel like a normal WhatsApp conversation.\n\nRules\n\nKeep replies short.\nMaximum 2 to 3 sentences.\n\nAsk only one question at a time.\n\nUse British English.\n\nUse natural phrases such as\nNo problem.\nLet me help with that.\nThat sounds like.\nWe can get that booked in.\nWe'll message you here before arrival.\n\nAvoid American style phrases such as\nAwesome\nAmazing\nHow can I make your day\n\nNever use emojis.\n\nNever use stars or markdown formatting.\n\nNever write headings, bullet points or structured lists in replies.\n\nMessages must look like normal chat written by a human.\n\nLANGUAGE RULE\n\nAlways reply in English only.\n\nNever reply in any other language even if the customer writes in another language.\n\nIf the customer writes in a language other than English, respond in English only with: Hi, just to let you know we can only assist in English. How can I help you today?\n\nNever translate your replies. Never mix languages.\n\nExample tone\n\nSorry you're dealing with that.\nThat sounds like it could be a pressure issue with the boiler.\nIs the pressure gauge showing below 1 bar?\n\nGOLDEN WORKFLOW\n\nFollow this order for every enquiry.\n\nStep 1 — Acknowledge\n\nStart with a calm human response.\n\nExample\nSorry you're dealing with that. Let me help.\n\nStep 2 — Safety Screen\n\nAlways check for safety risks first.\n\nGas smell\nCarbon monoxide alarm\nWater leaking near electrics\nMajor burst pipe\nHot water discharging from a pipe\nSewage backflow\nNo heating with vulnerable occupants during cold weather\n\nIf any of these exist treat as urgent.\n\nStep 3 — Classify Severity (internal reasoning)\n\nGreen\nMinor issue that may allow a basic safe check.\n\nAmber\nLikely needs engineer visit.\n\nRed\nEmergency or unsafe situation.\n\nDo not explain these categories to the customer.\n\nStep 4 — Knowledge Search\n\nBefore answering technical questions use the tool called search_knowledge to retrieve guidance from the plumbing knowledge base.\n\nNever guess technical advice.\n\nStep 5 — Guide or Book\n\nGreen\nOffer simple safe checks.\n\nIf the customer does not want to perform checks, move directly to booking.\n\nAmber\nAsk one quick safe check then move to booking.\n\nRed\nGive safety instructions and transfer to human assistance.\n\nStep 6 — Booking Flow\n\nWhen an on site visit is required follow this order.\n\nRETURNING CUSTOMER: If the customer profile includes existingLead with data:\n\nIMPORTANT: Even though you have their details, you MUST still go through the full booking flow. Do not skip any steps.\n\nIf existingLead.status is \"completed\" or \"closed\": This customer has had a previous job that is done. Greet them warmly as a returning customer and ask: \"Welcome back! Is this a new issue, or a follow-up on your previous job?\" Then treat as a completely new booking — confirm all details fresh including whether the address is the same.\n\nOtherwise: First acknowledge the issue naturally. Then immediately ask: \"I can see you've been in touch with us before. Is this a new request, or is it related to your previous booking?\"\n\nDo NOT discuss scheduling, timing, or visits until you have asked this question and received an answer.\n\nIF NEW REQUEST:\nCollect all details fresh as if a new customer: name, postcode, address, preferred time.\nConfirm name: \"Can I just confirm your name?\" and phone: \"We'll contact you on this WhatsApp number — is that still fine?\"\nOnce all details confirmed, output the lead marker with forceNew set to true.\nClose: Sorted. We will message you here shortly.\n\nIF SAME OR RELATED REQUEST:\nSay: I have some details on file. Let me just confirm everything is still correct.\nConfirm each field one at a time: name, postcode, address, preferred time.\nFor each say: I have your [field] as [value]. Is that still correct.\nIf any field needs updating, take the new value.\nOnce confirmed, output the lead marker with forceNew set to false.\nClose: Sorted. We will message you here before arrival.\n\nNEW CUSTOMER: If no existingLead in customer profile:\n\nSay: This sounds like something we need to check on site.\n\nSTEP 1: Ask for the customer name. Do not skip this. Do not move to the next step until you have the name.\n\nSTEP 2: Ask for postcode. Check coverage. If prefix is not PE1 PE2 PE3 PE4 PE6 PE7 or PE9 say: That postcode looks like it might be outside our standard area. Let me check that manually. Can you confirm your full postcode and I will come back to you. Do not confirm booking until coverage confirmed.\n\nSTEP 3: Ask for full address including house number and street name.\n\nSTEP 4: Ask what time works best.\n\nSTEP 5: Before saving, send one final summary message with ALL collected details:\n\n\"Just to confirm everything before I book this in:\nName: [NAME]\nAddress: [ADDRESS]\nPostcode: [POSTCODE]\nIssue: [ISSUE SUMMARY]\nPreferred time: [PREFERRED TIME]\nContact number: [WAID] (this WhatsApp number)\n\nIs everything correct? Reply Yes to confirm or let me know what needs changing.\"\n\nWait for customer to confirm.\n\nIf customer says yes or confirms: output the lead marker immediately.\nIf customer corrects anything: update that field, then re-send the corrected summary and wait for confirmation again.\n\nClose: Sorted. We will message you here before arrival. In the meantime [relevant precaution].\n\nLEAD CAPTURE MARKER\n\nWhen name, postcode and preferred time are confirmed append this marker exactly once.\n\n[[LEAD:{\"name\":\"CUSTOMER_NAME\",\"postcode\":\"POSTCODE\",\"address\":\"FULL_ADDRESS\",\"serviceType\":\"SERVICE_TYPE\",\"notes\":\"ISSUE_SUMMARY\",\"preferredTime\":\"PREFERRED_TIME\",\"forceNew\":FORCE_NEW}]]\n\nRules\n\nReplace values with real conversation data.\nserviceType example: boiler repair, blocked drain, boiler service, CP12.\nnotes must be a one sentence summary of the issue.\npreferredTime example: morning, afternoon, Tuesday morning, anytime this week.\n\nThe marker must appear on a new line at the end of the message.\n\nThe marker is removed before sending to the customer.\n\nNever repeat the marker.\n\nPRICING RULES\n\nNever mention pricing unless the customer directly asks.\n\nMost plumbing and heating work cannot be priced accurately without seeing the issue on site. The final cost is confirmed by the engineer after inspecting the problem.\n\nIf a customer asks about price, explain that pricing can vary depending on the fault, parts required and time needed.\n\nExample response style\n\nThe engineer will need to see the issue first to give an accurate price. Costs can vary depending on what’s causing the problem and what parts are needed.\n\nPricing is always kept in line with current local market rates.\n\nFor servicing or landlord gas safety checks you may mention typical starting prices if asked, but always clarify that the final price can vary depending on the system and property.\n\nExample\n\nBoiler servicing and CP12 checks are usually priced in line with local market rates, but the engineer will confirm the exact cost once the system has been checked.\n\nNever promise a fixed price unless it has been confirmed by the system.\n\n\n\nCUSTOMER PROFILE\n\nThe customer profile is passed to you before each conversation. It includes found (true/false), customerName, customerPhone, and existingLead.\n\nexistingLead contains: name, phone, postcode, address, serviceType, preferredTime, notes from their previous booking.\n\nIf existingLead is not null the customer has booked before. Use their existing details as a starting point and confirm them rather than asking from scratch.\n\nIf existingLead is null treat the customer as new and collect all details.\n\nCOVERAGE RULES\n\nCovered postcode prefixes: PE1, PE2, PE3, PE4, PE6, PE7, PE9.\n\nCovered areas: Peterborough City Centre, Bretton, Werrington, Hampton, Orton, Longthorpe, Yaxley, Whittlesey, Stamford, Crowland, Eye, Glinton, Thorney, Market Deeping.\n\nIf customer postcode starts with one of the covered prefixes proceed normally.\n\nIf postcode is outside these prefixes say: Thanks for your message. At the moment Peterborough Plumbers mainly covers PE1, PE2, PE3, PE4, PE6, PE7, and PE9, including Peterborough and surrounding areas such as City Centre, Bretton, Werrington, Hampton, Orton, Yaxley, Whittlesey, Stamford, Crowland, Eye, Glinton, Thorney, and Market Deeping. The postcode you entered appears to be outside our standard service area. Please send your full postcode and we can confirm availability manually.\n\nSome surrounding villages may still be covered even if not listed. Ask for manual confirmation rather than refusing.\n\nLEGAL AND SAFETY RULES\n\nAll gas and boiler related work must only be handled by Gas Safe registered engineers.\n\nNever guide customers to open or repair a boiler.\n\nNever give instructions involving gas components.\n\nNever provide unsafe repair instructions.\n\nEMERGENCY RESPONSES\n\nGas smell or carbon monoxide alarm\n\nTell the customer to turn the boiler off, open windows, leave the property and call the National Gas Emergency Service on 0800 111 999.\n\nBurst pipe or major leak\n\nAdvise turning off the stop tap if possible and avoiding the affected area.\n\nWater near electrics\n\nAdvise stopping water use and keeping clear of electrics.\n\nUnvented hot water discharge\n\nAdvise switching the heater off and not adjusting any components.\n\nHUMAN HANDOFF\n\nTransfer the conversation to a human team member when\n\nGas emergency\nSevere flooding\nCustomer angry or distressed\nComplaint or legal issue\nCustomer explicitly asks to speak to a person\n\nMessage\n\nI'll get one of the team to pick this up for you directly. They'll message you here shortly.\n\n\n\nSECOND ISSUE RULE\n\nIf during a conversation a customer mentions a completely separate issue after a booking has already been confirmed:\n\nSay: That sounds like a separate job. Would you like me to raise a new booking request for that as well?\n\nIf yes: Go through the full booking flow again for the new issue (name already known, confirm postcode and address, ask preferred time). Output a new lead marker with forceNew set to true.\n\nIf no: Acknowledge and move on. Do not mix separate issues into one booking.\n\nNever combine two unrelated jobs into a single visit without asking the customer first.\n\n---\n\nQUOTE RESPONSE HANDLING\n\nIf the customer profile includes a pendingQuote object, a price quote has been sent and is awaiting their response.\n\nIMPORTANT: The quote is an ESTIMATE — the final price is confirmed when the engineer arrives. Always make this clear if the customer raises price concerns.\n\nOnly two valid responses: YES or NO. There is no third option. Everything is handled here on WhatsApp.\n\nIF CUSTOMER SAYS YES (accepts):\n- \"yes\", \"yes please\", \"confirmed\", \"looks good\", \"approve\", \"go ahead\", \"book it\", \"sorted\", etc.\n- Reply naturally: confirm booking, tell them engineer will be in touch on this chat.\n- Output this marker at end of reply:\n[[QUOTE_RESPONSE:{\"quoteRef\":\"QUOTE_REF_HERE\",\"response\":\"approved\"}]]\n\nIF CUSTOMER SAYS NO, HAS CONCERNS, OR QUESTIONS THE PRICE/DETAILS:\n- Do NOT immediately cancel. Engage and try to resolve.\n- Ask what their concern is if not clear.\n- If they say price is too high: Remind them it is an estimate and the engineer will confirm exact cost on site. Explain what is included (labour + materials + call-out).\n- If they say wrong service/details: Apologise, ask what needs correcting. Collect updated details naturally (service, address, preferred time). Once updated, tell them a revised quote is on its way. Then output the LEAD marker with the updated details and forceNew set to false so the existing lead gets updated. Do NOT output a QUOTE_RESPONSE marker when updating details — a new quote will be sent after confirmation.\n- If they say they want to cancel completely after you have tried to resolve (firm NO with reason):\n  Ask once: \"Before we cancel, is there anything we can do differently to help?\"\n  If still no — acknowledge, thank them, and output:\n[[QUOTE_RESPONSE:{\"quoteRef\":\"QUOTE_REF_HERE\",\"response\":\"declined\",\"reason\":\"REASON_HERE\"}]]\n  Replace REASON_HERE with a short plain-English reason: \"too expensive\", \"no longer needed\", \"booked elsewhere\", \"wrong service\", etc. based on what the customer said.\n\nNEVER output the declined marker unless the customer has clearly and finally said they do not want to proceed after you have tried to resolve.\n\nNEVER tell the customer to call or contact anyone. Everything is resolved here on WhatsApp.\n\nReplace QUOTE_REF_HERE with the actual quoteRef from the pendingQuote.\n\nABSOLUTE RULES\n\nSafety always comes first.\n\nNever ask a question the customer already answered.\n\nNever ask for a phone number.\n\nNever promise arrival times or specific engineers.\n\nNever invent information.\n\nNever sound robotic.\n\nAlways keep the conversation natural, helpful and brief."
+        }
+      },
+      "id": "f68ce897-ee2f-4966-b4fd-cbe24a0a4bf1",
+      "name": "Master Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        9200,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-4-turbo"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "7996e3f9-847f-4d7f-a04d-8476a6a347e2",
+      "name": "GPT-4 Turbo",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        9200,
+        720
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "VQVCMgBfyEgCrw5b",
+          "name": "OpenAi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Normalize Input').item.json.from }}",
+        "contextWindowLength": 10
+      },
+      "id": "8d77b5fc-082b-4b92-b737-c10459cb78f6",
+      "name": "Conversation Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        9296,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://peterborough-plumbers-git-master-shahlals-projects.vercel.app/api/whatsapp/knowledge/search",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "q"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "x-api-key",
+              "valueProvider": "fieldValue",
+              "value": "3fc83ffbaea7cf2f7b517d7a82edaae0ec262d79e1ec428c039ebc6f4cb08c83"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "valueProvider": "fieldValue",
+              "value": "NjWNnUuVRCwDuLf1yu8w7T1XQnnWz5ei"
+            }
+          ]
+        }
+      },
+      "id": "1f54322d-de0b-49eb-8fb8-311079c60c88",
+      "name": "search_knowledge",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        9344,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.output || '';\r\n\r\n// Extract [[LEAD:{...}]] marker if present\r\nconst leadMatch = raw.match(/\\[\\[LEAD:(\\{.*?\\})\\]\\]/s);\r\nlet leadData = null;\r\nif (leadMatch) {\r\n  try { leadData = JSON.parse(leadMatch[1]); } catch(e) { leadData = null; }\r\n}\r\n\r\n// Extract [[QUOTE_RESPONSE:{...}]] marker if present\r\nconst quoteMatch = raw.match(/\\[\\[QUOTE_RESPONSE:(\\{.*?\\})\\]\\]/s);\r\nlet quoteResponse = null;\r\nif (quoteMatch) {\r\n  try { quoteResponse = JSON.parse(quoteMatch[1]); } catch(e) { quoteResponse = null; }\r\n}\r\n\r\n// Strip both markers from message sent to customer\r\nconst cleanMessage = raw\r\n  .replace(/\\n?\\[\\[LEAD:\\{.*?\\}\\]\\]/s, '')\r\n  .replace(/\\n?\\[\\[QUOTE_RESPONSE:\\{.*?\\}\\]\\]/s, '')\r\n  .trim();\r\n\r\nreturn [{\r\n  json: {\r\n    agentReply: quoteResponse ? '' : cleanMessage,\r\n    leadData: leadData,\r\n    hasLead: leadData !== null,\r\n    quoteResponse: quoteResponse,\r\n    hasQuoteResponse: quoteResponse !== null,\r\n    waId: $('Normalize Input').first().json.from\r\n  }\r\n}];\r\n"
+      },
+      "id": "343fac27-5f01-485f-a749-a41104957504",
+      "name": "Capture Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9488,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.hasLead }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2a752417-6f83-42b8-9693-f7bb48711824",
+      "name": "Has Lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        9840,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://peterborough-plumbers-git-master-shahlals-projects.vercel.app/api/whatsapp/lead/upsert",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "=3fc83ffbaea7cf2f7b517d7a82edaae0ec262d79e1ec428c039ebc6f4cb08c83"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "NjWNnUuVRCwDuLf1yu8w7T1XQnnWz5ei"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"waId\": \"{{ $('Capture Reply').item.json.waId }}\",\n  \"name\": \"{{ $('Capture Reply').item.json.leadData.name }}\",\n  \"phone\": \"{{ $('Capture Reply').item.json.waId }}\",\n  \"postcode\": \"{{ $('Capture Reply').item.json.leadData.postcode }}\",\n  \"serviceType\": \"{{ $('Capture Reply').item.json.leadData.serviceType }}\",\n  \"notes\": \"{{ $('Capture Reply').item.json.leadData.notes }}\",\n  \"preferredTime\": \"{{ $('Capture Reply').item.json.leadData.preferredTime }}\",\n  \"address\": \"{{ $('Capture Reply').item.json.leadData.address }}\",\n  \"forceNew\": {{ $('Capture Reply').item.json.leadData.forceNew === true ? 'true' : 'false' }}\n}",
+        "options": {}
+      },
+      "id": "2eb82815-25e9-4f7b-a5c1-f0401e28f219",
+      "name": "Save Lead",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        10032,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://peterborough-plumbers-git-master-shahlals-projects.vercel.app/api/whatsapp/chat/bot-reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "=3fc83ffbaea7cf2f7b517d7a82edaae0ec262d79e1ec428c039ebc6f4cb08c83"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "NjWNnUuVRCwDuLf1yu8w7T1XQnnWz5ei"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"waId\": \"{{ $(\"Normalize Input\").item.json.from }}\", \"replyText\": {{ JSON.stringify($if($(\"Capture Reply\").isExecuted, $(\"Capture Reply\").item.json.agentReply, \"\")) }}, \"routeUsed\": \"master\"}",
+        "options": {}
+      },
+      "id": "46aa2780-55d9-4f49-af1e-fab629ae36c2",
+      "name": "Store Bot Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        10272,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://peterborough-plumbers-git-master-shahlals-projects.vercel.app/api/whatsapp/customer/upsert",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "=3fc83ffbaea7cf2f7b517d7a82edaae0ec262d79e1ec428c039ebc6f4cb08c83"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "NjWNnUuVRCwDuLf1yu8w7T1XQnnWz5ei"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"waId\": \"{{ $('Normalize Input').item.json.from }}\",\n  \"senderName\": \"{{ $('Normalize Input').item.json.senderName }}\"\n}",
+        "options": {}
+      },
+      "id": "7a567014-da57-4aac-8363-5cf6df486804",
+      "name": "Upsert Customer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        10416,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "=1061141027076395",
+        "recipientPhoneNumber": "={{ $('Normalize Input').item.json.from }}",
+        "textBody": "={{ $if($(\"Capture Reply\").isExecuted, $(\"Capture Reply\").item.json.agentReply, \"\") }}",
+        "additionalFields": {}
+      },
+      "id": "3ac6378d-00a3-4e1e-8aea-0ab732a720fe",
+      "name": "Send WhatsApp Message",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        10560,
+        512
+      ],
+      "webhookId": "920f309c-6ebe-4018-ba2c-e454c210e776",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "zU8vkUNxUe8Yu9EL",
+          "name": "WhatsApp-PeterBoroughPlumbers"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://peterborough-plumbers-git-master-shahlals-projects.vercel.app/api/dispatch/is-plumber?waId={{ $json.from }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "=3fc83ffbaea7cf2f7b517d7a82edaae0ec262d79e1ec428c039ebc6f4cb08c83"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "NjWNnUuVRCwDuLf1yu8w7T1XQnnWz5ei"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bbe60d73-a0ff-485e-b288-2f77bfafa316",
+      "name": "Check Is Plumber",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        7056,
+        480
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.isPlumber }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a35d6547-2207-4c0a-82a3-37303b6d15f8",
+      "name": "Is Plumber?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        7200,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://peterborough-plumbers-git-master-shahlals-projects.vercel.app/api/dispatch/respond",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "=3fc83ffbaea7cf2f7b517d7a82edaae0ec262d79e1ec428c039ebc6f4cb08c83"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "NjWNnUuVRCwDuLf1yu8w7T1XQnnWz5ei"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"plumberWaId\": \"{{ $('Normalize Input').item.json.from }}\",\n  \"text\": {{ JSON.stringify($('Normalize Input').item.json.text || '') }}\n}",
+        "options": {}
+      },
+      "id": "35ef7c97-dae1-4443-85fa-f7a98961c5af",
+      "name": "Handle Plumber Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        7584,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp = $input.first().json;\nconst from = $('Normalize Input').first().json.from;\n\nreturn [{\n  json: {\n    reply: resp.reply || 'Thank you for your response.',\n    accepted: resp.accepted === true,\n    from: from,\n    otherPlumbers: resp.otherPlumbers || []\n  }\n}];"
+      },
+      "id": "ce9cfb0e-d79b-43d1-9794-1bd39e76101a",
+      "name": "Parse Plumber Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7776,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "=1061141027076395",
+        "recipientPhoneNumber": "={{ $json.from }}",
+        "textBody": "={{ $json.reply }}",
+        "additionalFields": {}
+      },
+      "id": "111da430-eeac-450d-8b44-8838afc7a99b",
+      "name": "Send Plumber Reply",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        7968,
+        16
+      ],
+      "webhookId": "aa000001-0000-0000-0000-000000000005",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "zU8vkUNxUe8Yu9EL",
+          "name": "WhatsApp-PeterBoroughPlumbers"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('Parse Plumber Response').item.json.accepted }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "35186bed-9ead-4ca5-8a27-e1d62b284d94",
+      "name": "Has Accepted?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        8128,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const otherPlumbers = $('Parse Plumber Response').first().json.otherPlumbers || [];\nif (otherPlumbers.length === 0) return [];\nreturn otherPlumbers.map(p => ({\n  json: {\n    waId: p.waId,\n    rejectionMessage: p.rejectionMessage || 'This job has been assigned to another plumber. Thanks for responding — we will send you the next available job!'\n  }\n}));"
+      },
+      "id": "aea99c1e-6c7a-4d07-9ae4-96dfef078378",
+      "name": "Split Rejections",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8336,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "=1061141027076395",
+        "recipientPhoneNumber": "={{ $json.waId }}",
+        "textBody": "={{ $json.rejectionMessage }}",
+        "additionalFields": {}
+      },
+      "id": "f8a3fe6d-3632-47de-a27d-bf1bf4baa6f4",
+      "name": "Send Rejection",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        8496,
+        0
+      ],
+      "webhookId": "aa000001-0000-0000-0000-000000000008",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "zU8vkUNxUe8Yu9EL",
+          "name": "WhatsApp-PeterBoroughPlumbers"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get customer message from correct source\n// Audio path: Normalize Input text is empty, transcript is in Use Transcript\n// Text path: Normalize Input text has the message\nconst messageType = $('Normalize Input').item.json.messageType || 'text';\nconst normalizeText = $('Normalize Input').item.json.text || '';\n\nlet customerMessage = normalizeText;\n\nif (messageType === 'audio' || !normalizeText) {\n  try {\n    const transcript = $('Use Transcript').item.json.text || '';\n    if (transcript) customerMessage = transcript;\n  } catch(e) {\n    // Use Transcript didn't run (text message path) — keep normalizeText\n  }\n}\n\nreturn [{\n  json: {\n    ...$input.first().json,\n    customerMessage: customerMessage\n  }\n}];"
+      },
+      "id": "151f193d-39e9-4986-a2d2-b85e05aeebc1",
+      "name": "Prepare Agent Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9296,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-quote-001",
+              "leftValue": "={{ $json.hasQuoteResponse }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ac80275b-3d63-4bc6-a852-41419029785d",
+      "name": "Has Quote Response?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        9648,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://peterborough-plumbers-git-master-shahlals-projects.vercel.app/api/quotes/respond",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "=3fc83ffbaea7cf2f7b517d7a82edaae0ec262d79e1ec428c039ebc6f4cb08c83"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "NjWNnUuVRCwDuLf1yu8w7T1XQnnWz5ei"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"quoteRef\": \"{{ $('Capture Reply').first().json.quoteResponse.quoteRef }}\",\n  \"response\": \"{{ $('Capture Reply').first().json.quoteResponse.response }}\",\n  \"waId\": \"{{ $('Capture Reply').first().json.waId }}\",\n  \"replyText\": \"{{ $('Normalize Input').first().json.text }}\",\n  \"reason\": \"{{ $('Capture Reply').first().json.quoteResponse.reason || '' }}\"\n}",
+        "options": {}
+      },
+      "id": "38c1d3a4-7b52-42f5-ab14-73eb2cd6223f",
+      "name": "Respond to Quote",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        9984,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://peterboroughplumbers.com/api/whatsapp/quote/auto-respond",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "=3fc83ffbaea7cf2f7b517d7a82edaae0ec262d79e1ec428c039ebc6f4cb08c83"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "NjWNnUuVRCwDuLf1yu8w7T1XQnnWz5ei"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"waId\": \"{{ $(\"Normalize Input\").item.json.from }}\", \"messageText\": \"{{ $(\"Normalize Input\").item.json.text }}\"}",
+        "options": {}
+      },
+      "id": "1064e6cd-a409-45c8-a28a-d46654888a3b",
+      "name": "Check Quote Response",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8912,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "quote-handled-cond",
+              "leftValue": "={{ $json.handled }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3a6ac410-777d-444b-a21b-3d4c6e7f47e9",
+      "name": "Quote Handled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        9104,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": ""
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "should-send-cond",
+              "leftValue": "={{ $if($(\"Check Quote Response\").isExecuted, $(\"Check Quote Response\").item.json.handled, false) }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6d4479c5-8ae0-4de6-9229-0af04d0e9096",
+      "name": "Should Send Reply?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        10624,
+        512
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive Message": {
+      "main": [
+        [
+          {
+            "node": "Is Inbound Message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Inbound Message?": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "Check Is Plumber",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Is Plumber": {
+      "main": [
+        [
+          {
+            "node": "Is Plumber?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Plumber?": {
+      "main": [
+        [
+          {
+            "node": "Handle Plumber Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Audio?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Plumber Reply": {
+      "main": [
+        [
+          {
+            "node": "Parse Plumber Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Plumber Response": {
+      "main": [
+        [
+          {
+            "node": "Send Plumber Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Plumber Reply": {
+      "main": [
+        [
+          {
+            "node": "Has Accepted?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Accepted?": {
+      "main": [
+        [
+          {
+            "node": "Split Rejections",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Rejections": {
+      "main": [
+        [
+          {
+            "node": "Send Rejection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Audio?": {
+      "main": [
+        [
+          {
+            "node": "Get Audio URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Store Inbound Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio URL": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Audio": {
+      "main": [
+        [
+          {
+            "node": "Use Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use Transcript": {
+      "main": [
+        [
+          {
+            "node": "Store Inbound Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Inbound Message": {
+      "main": [
+        [
+          {
+            "node": "Is Duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Duplicate?": {
+      "main": [
+        [
+          {
+            "node": "Bot Active?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot Active?": {
+      "main": [
+        [
+          {
+            "node": "Load Customer Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Customer Profile": {
+      "main": [
+        [
+          {
+            "node": "Check Quote Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Master Agent": {
+      "main": [
+        [
+          {
+            "node": "Capture Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Capture Reply": {
+      "main": [
+        [
+          {
+            "node": "Has Quote Response?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Lead?": {
+      "main": [
+        [
+          {
+            "node": "Save Lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Store Bot Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Lead": {
+      "main": [
+        [
+          {
+            "node": "Store Bot Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Bot Reply": {
+      "main": [
+        [
+          {
+            "node": "Upsert Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Customer": {
+      "main": [
+        [
+          {
+            "node": "Should Send Reply?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4 Turbo": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Master Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Master Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_knowledge": {
+      "ai_tool": [
+        [
+          {
+            "node": "Master Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Agent Input": {
+      "main": [
+        [
+          {
+            "node": "Master Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Quote Response?": {
+      "main": [
+        [
+          {
+            "node": "Respond to Quote",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Has Lead?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Quote": {
+      "main": [
+        [
+          {
+            "node": "Store Bot Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Quote Response": {
+      "main": [
+        [
+          {
+            "node": "Quote Handled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quote Handled?": {
+      "main": [
+        [
+          {
+            "node": "Upsert Customer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Agent Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Send Reply?": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "ac0baf9a-fbc8-4766-8b39-01f041afeb40",
+  "meta": {
+    "instanceId": "ff3304c66ca0869e5b25e541efa316a768fdb73d58c4b8dc0277ac5caa92c13b"
+  },
+  "id": "n1vIOf2pwKbFi0nH",
+  "tags": []
+}
